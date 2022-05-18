@@ -16,3 +16,4 @@
 * План разработки 1 вариант (https://docs.google.com/document/d/1vbDIWTOvsrj_9bx9A9s-Z4CKeaYoPF2wgYNyaVC69FA);
 * План разработки 2 вариант (https://docs.google.com/document/d/1zoZHXiCXUTEBT09Rz0tQB3YSuYOzs_da);
 * План управления конфигурацией (https://docs.google.com/document/d/1irp6wOPRsr2SfXxJE-ziSqsxXUJmqZJz);
+* Описание и тестирование БД (https://drive.google.com/file/d/1frcMyZvixbylTQjeLHFRCx7NVQVtrtvm/view)
