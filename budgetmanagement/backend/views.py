@@ -5,6 +5,7 @@ from django.contrib.auth import authenticate
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
+import json
 
 
 @api_view(['POST'])
@@ -18,7 +19,14 @@ def api_login(request):
         print(user_profile)
         result = f'success: phone is {user_profile.phone}'
         print(result)
-        return Response(result)
+        user_serializer = UserSerializer(user)
+        user_profile_serializer = UserProfileSerializer(user_profile)
+        result_json = user_profile_serializer.data
+        user_json = user_serializer.data
+        user_json.pop('password')
+        user_json['date_joined'] = user.date_joined.strftime("%Y-%m-%d %H:%M:%S")
+        result_json['user'] = user_json
+        return Response(result_json)
     else:
         result = 'Unauthorized'
         print(result)
