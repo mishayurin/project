@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 
 # In this model file to communicate with the database
@@ -31,3 +32,9 @@ class Expenses(models.Model):
     Client_ID = models.ForeignKey(Client, on_delete = models.CASCADE)
     Limits_ID = models.ForeignKey(Limits, on_delete = models.CASCADE)
     Expenses_types_ID = models.ForeignKey(Expenses_Types, on_delete = models.CASCADE)
+
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    phone = models.CharField(max_length=30, null=True, blank=True)
+    photo = models.ImageField(upload_to='images/', null=True)
