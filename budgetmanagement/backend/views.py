@@ -1,11 +1,19 @@
 from .models import UserProfile
 from .serializers import UserSerializer, UserProfileSerializer
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, login, logout
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-import json
+
+
+@api_view(['GET'])
+def api_is_authenticated(request):
+    if request.user.is_authenticated:
+        result_json = {'username': request.user.username}
+        return Response(result_json)
+    else:
+        return Response('Anonymous')
 
 
 @api_view(['POST'])
@@ -26,11 +34,23 @@ def api_login(request):
         user_json.pop('password')
         user_json['date_joined'] = user.date_joined.strftime("%Y-%m-%d %H:%M:%S")
         result_json['user'] = user_json
+
+        login(request, user)
         return Response(result_json)
     else:
         result = 'Unauthorized'
         print(result)
         return Response(result)
+
+
+@api_view(['GET'])
+def api_logout(request):
+    if request.user.is_authenticated:
+        result = f"User with username: '{request.user.username}' logged out"
+        logout(request)
+        return Response(result)
+    else:
+        return Response('Anonymous')
 
 
 @api_view(['POST'])
