@@ -53,6 +53,7 @@ def api_logout(request):
         return Response('Anonymous')
 
 
+
 @api_view(['POST'])
 def api_user_registration(request):
     if request.method == 'POST':
