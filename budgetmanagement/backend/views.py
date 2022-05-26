@@ -1,5 +1,6 @@
-from .models import UserProfile, Expenses_Types
-from .serializers import UserSerializer, UserProfileSerializer, ExpensesTypesSerializer
+from .models import UserProfile, Expenses_Types, Limits
+from .serializers import UserSerializer, UserProfileSerializer, \
+    ExpensesTypesSerializer, LimitsSerializer
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from rest_framework.decorators import api_view
@@ -145,6 +146,32 @@ def api_category_update(request, pk=None):
         except:
             return Response(status=status.HTTP_404_NOT_FOUND)
         serializer = ExpensesTypesSerializer(expenses_types, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(request.data)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+def api_limit(request):
+    if request.method == 'POST':
+        serializer = LimitsSerializer(data=request.data)
+        if serializer.is_valid():
+            limits = serializer.save()
+            print(limits.pk)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['PATCH'])
+def api_limit_update(request, pk=None):
+    if request.method == 'PATCH':
+        try:
+            limits = Limits.objects.get(pk=pk)
+        except:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        serializer = LimitsSerializer(limits, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(request.data)
