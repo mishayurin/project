@@ -14,7 +14,7 @@ def api_is_authenticated(request):
         result_json = {'username': request.user.username}
         return Response(result_json)
     else:
-        return Response('Anonymous')
+        return Response('Anonymous', status=status.HTTP_401_UNAUTHORIZED)
 
 
 @api_view(['POST'])
@@ -41,7 +41,7 @@ def api_login(request):
     else:
         result = 'Unauthorized'
         print(result)
-        return Response(result)
+        return Response(result, status=status.HTTP_401_UNAUTHORIZED)
 
 
 @api_view(['GET'])
@@ -51,7 +51,7 @@ def api_logout(request):
         logout(request)
         return Response(result)
     else:
-        return Response('Anonymous')
+        return Response('Anonymous', status=status.HTTP_401_UNAUTHORIZED)
 
 
 @api_view(['POST'])
