@@ -7,6 +7,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from django.db import IntegrityError
+from datetime import datetime, timedelta
 import copy
 
 
@@ -109,7 +110,8 @@ def api_user(request):
                         try:
                             user.set_password(password)
                         except Exception as e:
-                            return Response(e, status=status.HTTP_400_BAD_REQUEST)
+                            error = 'Error: Can\'t set password'
+                            return Response(error, status=status.HTTP_400_BAD_REQUEST)
                     user_serializer.save()
                     user_profile_serializer.save()
                     return Response(request.data)
@@ -177,3 +179,22 @@ def api_limit_update(request, pk=None):
             return Response(request.data)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+def api_limits(request):
+    if request.method == 'POST':
+        if 'datetime' not in request.data:
+            limits_all = Limits.objects.all()
+            serializer = LimitsSerializer(limits_all, many=True)
+            return Response(serializer.data)
+        try:
+            datetime_ = datetime.fromisoformat(request.data['datetime'])
+        except ValueError as e:
+            error = 'Error: Invalid isoformat string: ' \
+                    f'{request.data["datetime"]}'
+            return Response(error, status=status.HTTP_400_BAD_REQUEST)
+        limits_filtered = Limits.objects.filter(Date_time_gap__gt=datetime_, \
+                                           Date_time_gap__lte=datetime_ + timedelta(days=30))
+        serializer = LimitsSerializer(limits_filtered, many=True)
+        return Response(serializer.data)
