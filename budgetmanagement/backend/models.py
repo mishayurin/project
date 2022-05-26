@@ -15,8 +15,15 @@ class Client(models.Model):
 
 class Expenses_Types(models.Model):
     Expenses_types_ID = models.AutoField(primary_key=True)
-    Category = models.CharField(max_length=50, unique=True)
+    Category = models.CharField(max_length=50)
     Name_of_expenses_types = models.CharField(max_length=100)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["Category", "Name_of_expenses_types"],
+                name='FullCategory')
+        ]
 
 
 class Limits(models.Model):

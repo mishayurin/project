@@ -1,10 +1,11 @@
-from .models import UserProfile
-from .serializers import UserSerializer, UserProfileSerializer
+from .models import UserProfile, Expenses_Types
+from .serializers import UserSerializer, UserProfileSerializer, ExpensesTypesSerializer
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
+from django.db import IntegrityError
 import copy
 
 
@@ -118,3 +119,34 @@ def api_user(request):
         else:
             return Response(f'User with "username" {request.data["username"]} \
 is not authorized.', status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+def api_category(request):
+    if request.method == 'POST':
+        serializer = ExpensesTypesSerializer(data=request.data)
+        if serializer.is_valid():
+            try:
+                expenses_types = serializer.save()
+                print(expenses_types.pk)
+            except IntegrityError as e:
+                error = 'Error: UNIQUE constraint failed: ' \
+                        f'{request.data}'
+                return Response(error, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['PATCH'])
+def api_category_update(request, pk=None):
+    if request.method == 'PATCH':
+        try:
+            expenses_types = Expenses_Types.objects.get(pk=pk)
+        except:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        serializer = ExpensesTypesSerializer(expenses_types, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(request.data)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
