@@ -5,6 +5,7 @@ from django.contrib.auth import authenticate, login, logout
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
+import copy
 
 
 @api_view(['GET'])
@@ -53,7 +54,6 @@ def api_logout(request):
         return Response('Anonymous')
 
 
-
 @api_view(['POST'])
 def api_user_registration(request):
     if request.method == 'POST':
@@ -82,3 +82,39 @@ def api_user_registration(request):
                 return Response(user_profile_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['PATCH'])
+def api_user(request):
+    if request.method == 'PATCH':
+        if 'username' not in request.data:
+            return Response('''"username": [\
+"This field is required."]''', status=status.HTTP_400_BAD_REQUEST)
+        if request.user.is_authenticated and request.data['username'] == request.user.username:
+            user = request.user
+            password = None
+            user_data = copy.deepcopy(request.data)
+            if 'password' in request.data:
+                password = user_data.pop('password')
+            user_serializer = UserSerializer(user, user_data, partial=True)
+            if user_serializer.is_valid():
+                user_profile = UserProfile.objects.get(user=user)
+                user_profile_serializer = UserProfileSerializer(user_profile,
+                                                                data=request.data,
+                                                                partial=True)
+                if user_profile_serializer.is_valid():
+                    if password is not None:
+                        try:
+                            user.set_password(password)
+                        except Exception as e:
+                            return Response(e, status=status.HTTP_400_BAD_REQUEST)
+                    user_serializer.save()
+                    user_profile_serializer.save()
+                    return Response(request.data)
+                else:
+                    return Response(user_profile_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(f'User with "username" {request.data["username"]} \
+is not authorized.', status=status.HTTP_400_BAD_REQUEST)
